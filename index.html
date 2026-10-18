@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DSA Algorithm Visualizer &amp; Problem Solver</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f5f7f8;--panel:#fff;--ink:#1c2530;--mute:#5f6b78;--line:#d3dae0;--accent:#0f6e6e;--accent-ink:#fff;
+--cmp:#ffe58a;--mv:#ffb27a;--ok:#8fdc9a;--out:#e3e7ea;--err:#b3261e;--good:#1d6b34;--box:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a20;--panel:#1c242c;--ink:#e6ebf0;--mute:#9aa7b4;--line:#33404c;--accent:#4fb8b0;--accent-ink:#0b1a19;
+--cmp:#7a6a1c;--mv:#8a4b22;--ok:#2d6b3a;--out:#2a333c;--err:#ff8a80;--good:#7fd18f;--box:#232d36}}
+:root[data-theme="dark"]{--bg:#141a20;--panel:#1c242c;--ink:#e6ebf0;--mute:#9aa7b4;--line:#33404c;--accent:#4fb8b0;--accent-ink:#0b1a19;
+--cmp:#7a6a1c;--mv:#8a4b22;--ok:#2d6b3a;--out:#2a333c;--err:#ff8a80;--good:#7fd18f;--box:#232d36}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+h1{font-size:24px;margin:0}h2{font-size:17px;margin:0 0 8px}h3{font-size:15px;margin:14px 0 4px}
+.sub{color:var(--mute);margin:2px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+input[type=text]{min-width:0}
+#data{flex:1 1 260px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}
+button.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.tabs button{border-radius:6px 6px 0 0}
+.tabs button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.pane{display:none}.pane.on{display:block}
+.boxes{display:flex;flex-wrap:wrap;gap:6px;min-height:62px}
+.bx{width:44px;text-align:center}
+.bx b{display:block;border:1px solid var(--line);background:var(--box);border-radius:6px;padding:8px 0;font-weight:700;color:var(--ink)}
+.bx i{font-style:normal;font-size:11px;color:var(--mute)}
+.bx.cmp b{background:var(--cmp)}.bx.mv b{background:var(--mv)}.bx.ok b{background:var(--ok)}.bx.out b{background:var(--out);color:var(--mute)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.log{height:230px;overflow:auto}
+.err{color:var(--err);min-height:22px}.okm{color:var(--good);min-height:22px}
+.legend{font-size:12px;color:var(--mute)}
+.stk{display:flex;flex-direction:column;gap:4px;width:150px;min-height:60px}
+.stk div,.que div{border:1px solid var(--line);background:var(--box);border-radius:6px;padding:8px;text-align:center;font-weight:700}
+.que{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;color:var(--mute);font-weight:400}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid var(--line);padding:5px 8px;text-align:left}
+.tw{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>DSA Algorithm Visualizer &amp; Problem Solver</h1>
+<p class="sub">Sorting, searching, stack and queue, step by step. Runs fully in your browser.</p>
+
+<div class="card">
+  <div class="row">
+    <label for="data">Data (comma-separated integers)</label>
+    <input type="text" id="data" placeholder="9, 4, 7, 1, 5">
+    <button class="p" id="load">Load data</button><button id="sample">Sample</button><button id="clear">Clear</button>
+  </div>
+  <div id="dmsg" class="err" role="status"></div>
+</div>
+
+<div class="tabs" role="tablist" id="tabs"></div>
+
+<div class="pane" id="p-sort"></div>
+<div class="pane" id="p-search"></div>
+
+<div class="pane" id="p-stack">
+  <div class="card"><h2>Stack <span class="tag">LIFO: Last In, First Out. Capacity 8.</span></h2>
+    <div class="row"><input type="text" id="sv" size="6" placeholder="value">
+      <button class="p" id="spush">Push</button><button id="spop">Pop</button><button id="speek">Peek</button>
+      <button id="sempty">Is empty</button><button id="sdisp">Display</button><button id="sreset">Reset</button></div>
+    <div id="smsg" role="status" style="min-height:22px;margin:6px 0"></div>
+    <div class="grid"><div><h3>Stack (top first)</h3><div class="stk" id="sview"></div></div>
+    <div><h3>Operation log</h3><div class="log card"><pre id="slog"></pre></div></div></div>
+  </div>
+</div>
+
+<div class="pane" id="p-queue">
+  <div class="card"><h2>Queue <span class="tag">FIFO: First In, First Out. Circular array, capacity 8.</span></h2>
+    <div class="row"><input type="text" id="qv" size="6" placeholder="value">
+      <button class="p" id="qenq">Enqueue</button><button id="qdeq">Dequeue</button><button id="qpeek">Peek / Front</button>
+      <button id="qempty">Is empty</button><button id="qdisp">Display</button><button id="qreset">Reset</button></div>
+    <div id="qmsg" role="status" style="min-height:22px;margin:6px 0"></div>
+    <h3>Queue (front to rear)</h3><div class="que" id="qview"></div>
+    <h3>Operation log</h3><div class="log card"><pre id="qlog"></pre></div>
+  </div>
+</div>
+
+<div class="pane" id="p-concepts">
+  <div class="card">
+    <h2>DSA concepts</h2>
+    <h3>Algorithm</h3><p>A finite, step-by-step set of instructions that solves a problem, such as sorting a list.</p>
+    <h3>Data structure</h3><p>A way of organising data so it can be used efficiently: array, stack, queue.</p>
+    <h3>Sorting vs searching</h3><p>Sorting puts elements in order. Searching finds whether a value exists and where.</p>
+    <h3>Arrays and zero-based indexing</h3><p>The first element is at index 0. In [9, 4, 7], 9 is at index 0 and 7 is at index 2.</p>
+    <h3>Big-O</h3><p>Describes how running time grows with input size n. O(1) is constant, O(log n) halves the work each step, O(n) grows with n, O(n²) gets about four times slower when n doubles.</p>
+    <h3>Stack and queue</h3><p>A stack is LIFO, like a pile of plates. A queue is FIFO, like a ticket line.</p>
+    <h3>Why binary search needs sorted data</h3><p>It discards half the range by comparing with the middle value. That only works when everything on the left is smaller and everything on the right is larger. This app sorts a copy first, so the index it shows belongs to that copy.</p>
+    <h3>Complexity summary</h3>
+    <div class="tw"><table><tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th></tr>
+    <tr><td>Bubble (early exit)</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td></tr>
+    <tr><td>Selection</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td></tr>
+    <tr><td>Insertion</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td></tr>
+    <tr><td>Linear search</td><td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(1)</td></tr>
+    <tr><td>Binary search</td><td>O(1)</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td></tr></table></div>
+  </div>
+</div>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const MAX=100;
+let DATA=null;
+
+/* ---------- parsing ---------- */
+function parseArr(t){
+  if(!t.trim()) throw new Error("Input is empty. Enter integers separated by commas, e.g. 9, 4, 7, 1, 5");
+  const parts=t.split(","), out=[];
+  parts.forEach((p,i)=>{
+    p=p.trim();
+    if(!p) throw new Error("Value #"+(i+1)+" is empty. Remove extra or trailing commas.");
+    if(!/^[+-]?\d+$/.test(p)||Math.abs(Number(p))>2147483647) throw new Error("Value #"+(i+1)+" ("+p+") is not a valid integer. Use whole numbers like 9, -4, 0.");
+    out.push(Number(p));
+  });
+  if(out.length>MAX) throw new Error("Too many values ("+out.length+"). Maximum is "+MAX+".");
+  return out;
+}
+function parseInt1(t,name){
+  t=t.trim();
+  if(!t) throw new Error(name+" is empty. Enter a whole number, e.g. 7");
+  if(!/^[+-]?\d+$/.test(t)||Math.abs(Number(t))>2147483647) throw new Error(name+" ("+t+") is not a valid integer.");
+  return Number(t);
+}
+
+/* ---------- algorithms (record steps) ---------- */
+function rec(){const st=[];let c=0,m=0;return{st,cmp(){c++},mv(){m++},add(k,d,s,a=-1,b=-1,lo=-1,hi=-1){st.push({k,d,s:s.slice(),a,b,lo,hi,c,m})},get c(){return c},get m(){return m}}}
+const J=a=>"["+a.join(", ")+"]";
+
+function bubble(inp){const a=inp.slice(),r=rec(),n=a.length;r.add("INFO","Start: "+J(a),a);
+  for(let i=0;i<n-1;i++){let sw=false;r.add("INFO","Pass "+(i+1)+": compare neighbours; the largest unsorted value bubbles to index "+(n-1-i)+".",a);
+    for(let j=0;j<n-1-i;j++){r.cmp();r.add("COMPARE","Compare a["+j+"]="+a[j]+" with a["+(j+1)+"]="+a[j+1],a,j,j+1);
+      if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];sw=true;r.mv();r.add("SWAP",a[j+1]+" > "+a[j]+", so swap. Array: "+J(a),a,j,j+1)}}
+    if(!sw){r.add("INFO","No swaps in this pass, so the array is sorted. Stop early.",a);break}}
+  r.add("DONE","Sorted: "+J(a),a);return{r,out:a,mv:"Swaps"}}
+
+function selection(inp){const a=inp.slice(),r=rec(),n=a.length;r.add("INFO","Start: "+J(a),a);
+  for(let i=0;i<n-1;i++){let mn=i;r.add("INFO","Pass "+(i+1)+": find the smallest value in indices "+i+".."+(n-1)+".",a,i);
+    for(let j=i+1;j<n;j++){r.cmp();r.add("COMPARE","Compare a["+j+"]="+a[j]+" with current minimum a["+mn+"]="+a[mn],a,j,mn);
+      if(a[j]<a[mn]){mn=j;r.add("INFO","New minimum: a["+mn+"]="+a[mn],a,mn)}}
+    if(mn!==i){[a[i],a[mn]]=[a[mn],a[i]];r.mv();r.add("SWAP","Swap a["+i+"] and a["+mn+"]. Array: "+J(a),a,i,mn)}
+    else r.add("INFO","a["+i+"] is already the minimum; no swap.",a,i)}
+  r.add("DONE","Sorted: "+J(a),a);return{r,out:a,mv:"Swaps"}}
+
+function insertion(inp){const a=inp.slice(),r=rec(),n=a.length;r.add("INFO","Start: "+J(a)+" (index 0 is a sorted prefix)",a);
+  for(let i=1;i<n;i++){const key=a[i];let j=i-1;r.add("INFO","Take key a["+i+"] = "+key+" and insert it into the sorted prefix 0.."+(i-1)+".",a,i);
+    while(j>=0){r.cmp();r.add("COMPARE","Compare a["+j+"]="+a[j]+" with key "+key,a,j,i);
+      if(a[j]>key){a[j+1]=a[j];r.mv();r.add("SHIFT",a[j]+" > "+key+", shift it right ("+j+" to "+(j+1)+"). Array now: "+J(a),a,j,j+1);j--}else break}
+    a[j+1]=key;r.add("INFO","Place key "+key+" at index "+(j+1)+". Array: "+J(a),a,j+1)}
+  r.add("DONE","Sorted: "+J(a),a);return{r,out:a,mv:"Shifts"}}
+
+function linear(inp,t){const a=inp.slice(),r=rec();r.add("INFO","Searching for "+t+" from index 0 to "+(a.length-1)+" in the original order.",a);
+  for(let i=0;i<a.length;i++){r.cmp();r.add("COMPARE","Check index "+i+": a["+i+"]="+a[i]+(a[i]===t?" equals ":" is not equal to ")+"target "+t,a,i);
+    if(a[i]===t){r.add("FOUND","Found "+t+" at index "+i+" (zero-based).",a,i);return{r,out:a,found:true,idx:i,t}}}
+  r.add("DONE","Target "+t+" was not found after checking all "+a.length+" element(s).",a);return{r,out:a,found:false,idx:-1,t}}
+
+function binary(inp,t){const a=inp.slice().sort((x,y)=>x-y),r=rec();
+  r.add("INFO","Binary search needs SORTED data, so a sorted copy was made: "+J(a)+". Indices below refer to this copy.",a,-1,-1,0,a.length-1);
+  let lo=0,hi=a.length-1;
+  while(lo<=hi){const mid=lo+((hi-lo)>>1);r.cmp();r.add("COMPARE","Range ["+lo+", "+hi+"], mid = "+mid+", a["+mid+"]="+a[mid]+". Compare with target "+t,a,mid,-1,lo,hi);
+    if(a[mid]===t){r.add("FOUND","a["+mid+"] equals "+t+". Found at index "+mid+" of the SORTED copy (zero-based).",a,mid,-1,lo,hi);return{r,out:a,found:true,idx:mid,t,bin:true}}
+    if(a[mid]<t){r.add("INFO",a[mid]+" < "+t+": ignore the left half, low = "+(mid+1),a,mid,-1,mid+1,hi);lo=mid+1}
+    else{r.add("INFO",a[mid]+" > "+t+": ignore the right half, high = "+(mid-1),a,mid,-1,lo,mid-1);hi=mid-1}}
+  r.add("DONE","Range is empty. Target "+t+" is not in the sorted copy.",a);return{r,out:a,found:false,idx:-1,t,bin:true}}
+
+const INFO={
+ "Bubble Sort":["Compares neighbouring elements and swaps them when out of order. The largest unsorted value bubbles to the end each pass. A pass with no swaps stops the sort early.","O(n) with early exit","O(n²)","O(n²)","O(1)"],
+ "Selection Sort":["Finds the smallest value in the unsorted part and swaps it into the next position. Always does the same number of comparisons.","O(n²)","O(n²)","O(n²)","O(1)"],
+ "Insertion Sort":["Grows a sorted prefix. Takes the next element and shifts larger sorted elements right until it fits, like sorting playing cards.","O(n)","O(n²)","O(n²)","O(1)"],
+ "Linear Search":["Checks elements one by one until the target is found or the array ends. Works on unsorted data and reports the first match.","O(1)","O(n)","O(n)","O(1)"],
+ "Binary Search":["Compares the target with the middle element and discards half the range each step. Needs sorted data, so a sorted copy is searched and the index belongs to that copy.","O(1)","O(log n)","O(log n)","O(1)"]};
+const FN={"Bubble Sort":bubble,"Selection Sort":selection,"Insertion Sort":insertion,"Linear Search":linear,"Binary Search":binary};
+
+/* ---------- algorithm panel (used for Sorting and Searching) ---------- */
+function makePanel(root,algos,isSearch){
+  root.innerHTML=
+   '<div class="card"><div class="row"><label>Algorithm <select class="al">'+algos.map(a=>"<option>"+a+"</option>").join("")+'</select></label>'+
+   (isSearch?'<label>Target <input type="text" class="tg" size="6"></label><span class="legend">indices are zero-based</span>':"")+'</div>'+
+   '<div class="row" style="margin-top:8px"><button class="p st">Step</button><button class="ra">Run all</button><button class="fi">Finish</button><button class="rs">Reset</button>'+
+   '<label class="legend">Delay <input type="range" class="dl" min="100" max="1500" value="600"></label></div>'+
+   '<div class="err msg" role="status"></div></div>'+
+   '<div class="card"><h3 style="margin-top:0">Original array <span class="tag">(never modified)</span></h3><div class="boxes ob"></div>'+
+   '<h3 class="ct">Current array</h3><div class="boxes cb"></div>'+
+   '<div class="legend" style="margin-top:6px">Yellow: comparing. Orange: swap or shift. Green: found. Grey: outside the active search range.</div></div>'+
+   '<div class="grid"><div class="card"><h3 style="margin-top:0">Step log</h3><div class="log"><pre class="lg"></pre></div></div>'+
+   '<div><div class="card"><h3 style="margin-top:0">Result and counters</h3><pre class="rs2">Load data, then press Step or Run all.</pre></div>'+
+   '<div class="card"><h3 style="margin-top:0">Explanation and complexity</h3><pre class="in"></pre></div></div></div>';
+  const q=s=>root.querySelector(s);
+  let run=null,i=-1,timer=null;
+  const msg=(t,e=true)=>{const m=q(".msg");m.textContent=t;m.className=(e?"err":"okm")+" msg"};
+  const boxes=(el,arr,s)=>{el.innerHTML=(arr||[]).map((v,k)=>{let c="";
+     if(s&&s.lo>=0&&(k<s.lo||k>s.hi))c="out";
+     if(s&&(k===s.a||k===s.b))c=s.k==="COMPARE"?"cmp":(s.k==="SWAP"||s.k==="SHIFT")?"mv":s.k==="FOUND"?"ok":"cmp";
+     return '<div class="bx '+c+'"><b>'+v+'</b><i>'+k+'</i></div>'}).join("")};
+  const title=()=>{q(".ct").textContent=isSearch?(q(".al").value==="Binary Search"?"Sorted copy used by Binary Search (appears after the first step)":"Array being searched (original order)"):"Current array (working copy)"};
+  const showInfo=()=>{const f=INFO[q(".al").value];q(".in").textContent=q(".al").value+"\n\n"+f[0]+"\n\nTime complexity\n  Best    : "+f[1]+"\n  Average : "+f[2]+"\n  Worst   : "+f[3]+"\nAuxiliary space: "+f[4]};
+  function reset(note){clearInterval(timer);timer=null;run=null;i=-1;q(".lg").textContent="";
+    q(".rs2").textContent=DATA?"Press Step or Run all to start.":"Load data, then press Step or Run all.";
+    boxes(q(".ob"),DATA);boxes(q(".cb"),DATA);title();showInfo();msg(note||"",false)}
+  function start(){
+    if(run)return true;
+    if(!DATA||!DATA.length){msg("No data loaded. Enter integers at the top and press Load data.");return false}
+    try{const al=q(".al").value;run=isSearch?FN[al](DATA,parseInt1(q(".tg").value,"Target")):FN[al](DATA);}
+    catch(e){run=null;msg(e.message);return false}
+    i=-1;q(".lg").textContent="";msg("",false);return true}
+  function show(from,to){const st=run.r.st,n=st.length;let t="";
+    for(let k=from;k<=to;k++)t+="Step "+(k+1)+"/"+n+" ["+st[k].k+"] "+st[k].d+"\n";
+    const lg=q(".lg");lg.textContent+=t;lg.parentNode.scrollTop=lg.parentNode.scrollHeight;i=to;
+    const s=st[to];boxes(q(".cb"),s.s,s);
+    let r="Algorithm      : "+q(".al").value+"\nOriginal input : "+J(DATA)+"\nProgress       : step "+(to+1)+" of "+n+"\nComparisons    : "+s.c+"\n";
+    if(run.mv)r+=run.mv.padEnd(15)+": "+s.m+"\n";
+    if(to===n-1){r+="\n";
+      if(isSearch){r+=run.found?"RESULT: Target "+run.t+" FOUND at index "+run.idx+" (zero-based) of the "+(run.bin?"SORTED copy.":"original array.")+"\n":"RESULT: Target "+run.t+" NOT FOUND.\n";
+        if(run.bin)r+="Sorted copy searched: "+J(run.out)+"\nNote: this index is NOT the position in the original array.";}
+      else r+="Sorted output  : "+J(run.out)+"\n(The original input is unchanged, so try another algorithm on it.)";
+      msg("Finished.",false)}
+    q(".rs2").textContent=r}
+  const done=()=>run&&i>=run.r.st.length-1;
+  const step=()=>{clearInterval(timer);timer=null;if(!start())return;if(done()){msg("Already finished. Press Reset to run again.",false);return}show(i+1,i+1)};
+  q(".st").onclick=step;
+  q(".ra").onclick=()=>{clearInterval(timer);timer=null;if(!start())return;if(done()){msg("Already finished. Press Reset to run again.",false);return}
+    const tick=()=>{if(done()){clearInterval(timer);timer=null;return}show(i+1,i+1);if(done()){clearInterval(timer);timer=null}};
+    timer=setInterval(tick,+q(".dl").value);msg("Running...",false)};
+  q(".fi").onclick=()=>{clearInterval(timer);timer=null;if(!start())return;if(done()){msg("Already finished. Press Reset to run again.",false);return}show(i+1,run.r.st.length-1)};
+  q(".rs").onclick=()=>reset("Reset. Original input restored.");
+  q(".al").onchange=()=>reset();
+  if(isSearch)q(".tg").oninput=()=>reset();
+  reset();
+  return{reset};
+}
+const sortP=makePanel($("p-sort"),["Bubble Sort","Selection Sort","Insertion Sort"],false);
+const searchP=makePanel($("p-search"),["Linear Search","Binary Search"],true);
+
+/* ---------- stack ---------- */
+const CAP=8;let stack=[];
+function slog(t,err){$("slog").textContent+=(err?"ERROR: ":"")+t+"\n";const m=$("smsg");m.textContent=t;m.className=err?"err":"okm";$("slog").parentNode.scrollTop=1e9;
+  $("sview").innerHTML=stack.slice().reverse().map((v,k)=>"<div>"+v+(k===0?' <span class="tag">top</span>':"")+"</div>").join("")||'<span class="tag">(empty stack)</span>'}
+function sdo(f){try{slog(f())}catch(e){slog(e.message,true)}}
+$("spush").onclick=()=>sdo(()=>{const v=parseInt1($("sv").value,"Value");if(stack.length>=CAP)throw new Error("Stack overflow: the stack is full (capacity "+CAP+").");stack.push(v);$("sv").value="";return "Push "+v+" -> stack is now "+J(stack.slice().reverse())});
+$("spop").onclick=()=>sdo(()=>{if(!stack.length)throw new Error("Stack underflow: cannot pop from an empty stack.");return "Pop -> removed "+stack.pop()});
+$("speek").onclick=()=>sdo(()=>{if(!stack.length)throw new Error("Stack is empty: nothing to peek.");return "Peek -> top is "+stack[stack.length-1]});
+$("sempty").onclick=()=>sdo(()=>"Is empty? "+(stack.length===0));
+$("sdisp").onclick=()=>sdo(()=>"Display (top to bottom): "+J(stack.slice().reverse()));
+$("sreset").onclick=()=>{stack=[];$("slog").textContent="";slog("Stack reset.")};
+$("sv").onkeydown=e=>{if(e.key==="Enter")$("spush").click()};
+
+/* ---------- queue (circular array) ---------- */
+const qd=new Array(CAP).fill(0);let qf=0,qn=0;
+const qarr=()=>Array.from({length:qn},(_,k)=>qd[(qf+k)%CAP]);
+function qlog(t,err){$("qlog").textContent+=(err?"ERROR: ":"")+t+"\n";const m=$("qmsg");m.textContent=t;m.className=err?"err":"okm";$("qlog").parentNode.scrollTop=1e9;
+  const a=qarr();$("qview").innerHTML=a.map((v,k)=>"<div>"+v+'<br><span class="tag">'+(k===0?"front":"")+(k===0&&k===a.length-1?" / ":"")+(k===a.length-1?"rear":"")+"</span></div>").join("")||'<span class="tag">(empty queue)</span>'}
+function qdo(f){try{qlog(f())}catch(e){qlog(e.message,true)}}
+$("qenq").onclick=()=>qdo(()=>{const v=parseInt1($("qv").value,"Value");if(qn===CAP)throw new Error("Queue overflow: the queue is full (capacity "+CAP+").");qd[(qf+qn)%CAP]=v;qn++;$("qv").value="";return "Enqueue "+v+" -> queue is now "+J(qarr())});
+$("qdeq").onclick=()=>qdo(()=>{if(!qn)throw new Error("Queue underflow: cannot dequeue from an empty queue.");const v=qd[qf];qf=(qf+1)%CAP;qn--;return "Dequeue -> removed "+v});
+$("qpeek").onclick=()=>qdo(()=>{if(!qn)throw new Error("Queue is empty: nothing at the front.");return "Front -> "+qd[qf]});
+$("qempty").onclick=()=>qdo(()=>"Is empty? "+(qn===0));
+$("qdisp").onclick=()=>qdo(()=>"Display (front to rear): "+J(qarr()));
+$("qreset").onclick=()=>{qf=0;qn=0;$("qlog").textContent="";qlog("Queue reset.")};
+$("qv").onkeydown=e=>{if(e.key==="Enter")$("qenq").click()};
+slog("Stack ready. Push a value to begin.");qlog("Queue ready. Enqueue a value to begin.");
+
+/* ---------- shared data + tabs ---------- */
+function load(){
+  try{DATA=parseArr($("data").value);$("dmsg").className="okm";$("dmsg").textContent="Loaded "+DATA.length+" value(s): "+J(DATA)}
+  catch(e){$("dmsg").className="err";$("dmsg").textContent=e.message;return}
+  sortP.reset();searchP.reset()}
+$("load").onclick=load;
+$("data").onkeydown=e=>{if(e.key==="Enter")load()};
+$("sample").onclick=()=>{$("data").value="9, 4, 7, 1, 5";load()};
+$("clear").onclick=()=>{$("data").value="";DATA=null;$("dmsg").textContent="";sortP.reset();searchP.reset()};
+
+const TABS=[["p-sort","Sorting"],["p-search","Searching"],["p-stack","Stack"],["p-queue","Queue"],["p-concepts","DSA Concepts"]];
+TABS.forEach(([id,name],k)=>{const b=document.createElement("button");b.textContent=name;b.setAttribute("role","tab");
+  b.onclick=()=>{TABS.forEach(([p],j)=>{$(p).classList.toggle("on",j===k);$("tabs").children[j].setAttribute("aria-selected",j===k)})};
+  $("tabs").appendChild(b)});
+$("tabs").children[0].click();
+</script>
+</body>
+</html>
